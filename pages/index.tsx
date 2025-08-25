@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/router";
+import { getAddress } from "viem";
 
 export default function Home() {
   const [address, setAddress] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
+  const isHexAddressFormat = useMemo(() => /^0x[0-9a-fA-F]{40}$/.test(address.trim()), [address]);
+
   const handleGo = () => {
-    if (!address) return;
-    router.push(`/dunechat/${address}`);
+    const raw = address.trim();
+    if (!raw) return;
+
+    try {
+      // Normalize to EIP-55 checksum. Accepts lowercase/uppercase input.
+      const normalized = getAddress(raw as `0x${string}`);
+      setError("");
+      router.push(`/dunechat/${normalized}`);
+    } catch {
+      setError("Invalid wallet address. Expected 0x + 40 hex chars.");
+    }
   };
 
   return (
@@ -22,8 +35,11 @@ export default function Home() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
+          {!!error && <span className="hint" style={{ color: "tomato" }}>{error}</span>}
           <div className="row">
-            <button className="btn btn-primary" onClick={handleGo}>Open chat</button>
+            <button className="btn btn-primary" onClick={handleGo} disabled={!isHexAddressFormat}>
+              Open chat
+            </button>
           </div>
         </div>
       </div>

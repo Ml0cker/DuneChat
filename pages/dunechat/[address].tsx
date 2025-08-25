@@ -48,10 +48,33 @@ export default function ChatPage() {
     }
   };
 
+  const shortenAddress = (addr?: string | string[]) => {
+    const a = Array.isArray(addr) ? addr[0] : addr;
+    if (!a) return "";
+    if (a.length <= 12) return a;
+    return `${a.slice(0, 6)}...${a.slice(-4)}`;
+  };
+
+  const copyAddress = async () => {
+    const a = Array.isArray(address) ? address[0] : address;
+    if (!a) return;
+    try {
+      await navigator.clipboard.writeText(a);
+      alert("Address copied");
+    } catch {
+      // no-op
+    }
+  };
+
   return (
     <div className="container">
       <div className="card" style={{ maxWidth: 680 }}>
-        <h1 className="title">Chat: {address as string}</h1>
+        <div className="row" style={{ alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <h1 className="title" style={{ margin: 0 }}>
+            Chat: {shortenAddress(address)}
+          </h1>
+          <button className="btn btn-secondary" onClick={copyAddress}>Copy</button>
+        </div>
         <p className="subtitle">Connect wallet and switch to Base chain to send a message.</p>
 
         <div className="row" style={{ marginBottom: 12 }}>
